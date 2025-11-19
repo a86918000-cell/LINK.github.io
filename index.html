@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>今明 — 玻璃雨夜 Landing</title>
+<style>
+  :root{
+    --bg-image: url("https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?q=80&w=1800&auto=format&fit=crop&ixlib=rb-4.0.3&s=6e2d6d87c7a7b3f830d5b5f2b1b3f4e6");
+    --glass-color: rgba(255,255,255,0.06);
+    --accent: rgba(255,255,255,0.95);
+    --muted: rgba(255,255,255,0.65);
+    --btn-bg: rgba(255,255,255,0.08);
+    --btn-border: rgba(255,255,255,0.14);
+    --safe-area-top: env(safe-area-inset-top, 16px);
+    --safe-area-bottom: env(safe-area-inset-bottom, 12px);
+    --ios-btn-height: 48px;
+  }
+
+  /* Mobile-first layout */
+  html,body{
+    height:100%;
+    margin:0;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    background: radial-gradient(ellipse at top, rgba(0,0,0,0.35), rgba(0,0,0,0.7));
+    color:var(--accent);
+  }
+
+  .stage{
+    position:relative;
+    width:100%;
+    min-height:100vh;
+    overflow:hidden;
+    display:flex;
+    align-items:stretch;
+    justify-content:center;
+  }
+
+  /* 背景圖（在最底層） */
+  .bg {
+    position:absolute;
+    inset:0;
+    background-image: var(--bg-image);
+    background-size:cover;
+    background-position:center center;
+    transform: scale(1.05); /* 微放大，讓邊緣更模糊 */
+    filter: blur(6px) brightness(0.6) saturate(1.1);
+    will-change: transform;
+    z-index:0;
+  }
+
+  /* 細微移動的城市霓虹（製造深度） */
+  .bg::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg, rgba(255,120,200,0.02), rgba(0,0,0,0.25));
+    mix-blend-mode:soft-light;
+    pointer-events:none;
+  }
+
+  /* 玻璃層（毛玻璃 + 水珠） */
+  .glass {
+    position:relative;
+    z-index:2;
+    width:100%;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:space-between;
+    padding: calc(var(--safe-area-top) + 18px) 18px calc(var(--safe-area-bottom) + 18px);
+    box-sizing:border-box;
+    background: linear-gradient(180deg, rgba(255,255,255,0.00), rgba(255,255,255,0.02));
+    backdrop-filter: blur(10px) saturate(1.05);
+    -webkit-backdrop-filter: blur(10px) saturate(1.05);
+  }
+
+  /* 一個半透明的卡片容器（把元素收在一起） */
+  .panel {
+    width:100%;
+    max-width:460px;
+    margin: 0 auto;
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:18px;
+    box-sizing:border-box;
+  }
+
+  /* 上方文字（今/明 垂直排列） */
+  .day-stack{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    gap:6px;
+    margin-top: 8vh;
+    user-select:none;
+  }
+  .day-stack .char {
+    font-size: 84px;
+    line-height:0.9;
+    font-weight:700;
+    letter-spacing: -2px;
+    color: white;
+    text-shadow:
+      0 6px 20px rgba(0,0,0,0.6),
+      0 0 18px rgba(255,255,255,0.04);
+    -webkit-text-stroke: 0.3px rgba(0,0,0,0.12);
+  }
+  @media (min-width:420px){
+    .day-stack .char { font-size:110px; }
+  }
+
+  /* 說明文字(可選) */
+  .subtitle {
+    text-align:center;
+    color:var(--muted);
+    font-size:14px;
+    margin-top:6px;
+  }
+
+  /* iOS 風格按鈕群 */
+  .btn-row{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin-bottom: calc(var(--safe-area-bottom) + 6px);
+  }
+
+  .ios-btn{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    height: var(--ios-btn-height);
+    padding: 0 14px;
+    border-radius: 14px;
+    background: var(--btn-bg);
+    border: 1px solid var(--btn-border);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.02);
+    color:var(--accent);
+    text-decoration:none;
+    font-size:16px;
+    font-weight:600;
+    transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .ios-btn:active { transform: translateY(1px) scale(0.998); }
+  .ios-btn .icon {
+    width:28px;
+    height:28px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+  .ios-btn .label {
+    flex:1;
+    text-align:left;
+  }
+  .ios-btn.small { height:40px; border-radius:12px; font-size:15px; }
+
+  /* 淡入動畫 */
+  .fade-in {
+    animation: fadeInUp .7s ease both;
+  }
+  @keyframes fadeInUp {
+    from { transform: translateY(8px); opacity:0; }
+    to { transform: translateY(0); opacity:1; }
+  }
+
+  /* canvas 層 (雨) */
+  #rain-canvas {
+    position:absolute;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+    mix-blend-mode:screen;
+  }
+
+  /* 小提示文字 (底部) */
+  .footer-note {
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+    margin-top:6px;
+    margin-bottom:6px;
+  }
+
+  /* safe for desktop: center content */
+  @media (min-width:900px) {
+    .glass { align-items:center; }
+    .panel { margin-top: 12vh; }
+  }
+</style>
+</head>
+<body>
+  <div class="stage" role="application" aria-label="玻璃雨夜頁面">
+    <div class="bg" aria-hidden="true"></div>
+
+    <!-- Canvas for rain -->
+    <canvas id="rain-canvas" aria-hidden="true"></canvas>
+
+    <main class="glass">
+      <div class="panel">
+        <section class="day-stack fade-in" aria-hidden="false">
+          <div class="char" aria-label="今">今</div>
+          <div class="char" aria-label="明">明</div>
+          <div class="subtitle">努力接案中!!</div>
+        </section>
+
+        <nav class="btn-row fade-in" aria-label="社群連結">
+          <!-- LINE -->
+          <a class="ios-btn" href="https://line.me/ti/p/W7W3bTsnbX" target="_blank" rel="noopener noreferrer" aria-label="連結 LINE">
+            <span class="icon" aria-hidden="true">
+              <!-- LINE logo (簡化 SVG) -->
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="2" y="3" width="20" height="14" rx="3" fill="#fff" opacity="0.06"/>
+                <path d="M7 9c.35-1.2 1.86-2 3.5-2s3.15.8 3.5 2c.35 1.2-1.04 2.5-3.5 4-2.46-1.5-3.85-2.8-3.5-4Z" fill="currentColor" opacity="0.95"/>
+              </svg>
+            </span>
+            <span class="label">LINE — 個人</span>
+          </a>
+
+          <!-- IG -->
+          <a class="ios-btn" href="https://www.instagram.com/ming_arties?igsh=MWxtM2VpMDFtOHprbg== " target="_blank" rel="noopener noreferrer" aria-label="連結 Instagram">
+            <span class="icon" aria-hidden="true">
+              <!-- IG logo simplified -->
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                <circle cx="12" cy="12" r="3.1" fill="currentColor"/>
+                <circle cx="17.5" cy="6.5" r="0.7" fill="currentColor"/>
+              </svg>
+            </span>
+            <span class="label">InstaGram — 個人檔案</span>
+          </a>
+
+          <!-- TIKTOK -->
+          <a class="ios-btn" href="https://www.tiktok.com/@a86918000gmail.co?_t=ZS-90HiAWW2Ggs&_r=1" target="_blank" rel="noopener noreferrer" aria-label="連結 TikTok">
+            <span class="icon" aria-hidden="true">
+              <!-- TikTok-like icon simplified -->
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M14 7.2v6.3c0 1.8-1.6 3.3-3.5 3.3S7 15.3 7 13.5 8.6 10.2 10.5 10.2c.3 0 .6 0 .9.1V7.2h2.6z" fill="currentColor"/>
+                <path d="M15.8 6.2c.6.4 1.2.9 1.8 1.6V3.4h-1.9c-.1.2-.2.4-.3.6-.3.6-.5 1.2-.6 2.0.3 0 .6 0 .9.2z" fill="currentColor" opacity="0.95"/>
+              </svg>
+            </span>
+            <span class="label">TIKTOK — 今明建模</span>
+          </a>
+        </nav>
+
+        <div class="footer-note fade-in">輕點按鈕即可開啟對應 APP / 網頁</div>
+      </div>
+    </main>
+  </div>
+
+<script>
+/* ===== Rain Canvas =====
+   Mobile-first, optimized for performance:
+   - 自動調整解析度
+   - 限制最大雨滴數量
+   - 使用 requestAnimationFrame
+*/
+
+(function(){
+  const canvas = document.getElementById('rain-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  let w=0,h=0, drops=[];
+  const MAX_DROPS = 110; // 手機上足夠的數量（可調）
+  const DPR = Math.min(window.devicePixelRatio || 1, 2); // 限制 DPR，避免過度運算
+
+  function resize(){
+    w = canvas.width = Math.floor(innerWidth * DPR);
+    h = canvas.height = Math.floor(innerHeight * DPR);
+    canvas.style.width = innerWidth + 'px';
+    canvas.style.height = innerHeight + 'px';
+    // initialize drops
+    drops = [];
+    const startCount = Math.floor(MAX_DROPS * (innerWidth/400)); // 更大的寬度多一點
+    for(let i=0;i<startCount;i++) drops.push(newDrop(true));
+  }
+
+  function newDrop(initial){
+    // 雨滴物件
+    const x = Math.random()*w;
+    const y = initial ? Math.random()*h : -20 * DPR;
+    const len = (6 + Math.random()*18) * DPR;
+    const speed = (0.9 + Math.random()*2.6) * DPR;
+    const thickness = Math.max(0.6, Math.random()*1.8) * DPR;
+    const alpha = 0.12 + Math.random()*0.35;
+    const sway = (Math.random()*1.6 - 0.8) * DPR;
+    return {x,y,len,speed,thickness,alpha,sway};
+  }
+
+  function drawDrop(d){
+    // 使用線條 + 投影，製造流動感
+    ctx.beginPath();
+    ctx.moveTo(d.x, d.y);
+    ctx.lineTo(d.x + d.sway*3, d.y + d.len);
+    ctx.lineWidth = d.thickness;
+    ctx.strokeStyle = 'rgba(255,255,255,' + d.alpha + ')';
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // 當落下時產生短暫的水花 (簡單的亮點)
+    if (Math.random() < 0.005) {
+      ctx.beginPath();
+      ctx.arc(d.x + d.sway*2, d.y + d.len + 2*DPR, 1.6*DPR, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(255,255,255,' + (d.alpha*0.35) + ')';
+      ctx.fill();
+    }
+  }
+
+  function update(){
+    ctx.clearRect(0,0,w,h);
+
+    // 每幀隨機新增少量雨滴，保持動感但不爆炸
+    if (drops.length < MAX_DROPS && Math.random() < 0.6) drops.push(newDrop(false));
+
+    for(let i=0;i<drops.length;i++){
+      const d = drops[i];
+      d.y += d.speed;
+      d.x += Math.sin(d.y * 0.01) * 0.3 * DPR; // 微小左右擺動
+      drawDrop(d);
+      if (d.y - d.len > h + 40*DPR) {
+        // recycle
+        drops[i] = newDrop(false);
+      }
+    }
+    window.requestAnimationFrame(update);
+  }
+
+  // subtle horizontal streaks on top of glass (CSS-like) — drawn as translucent lines for extra realism
+  function drawStreaks(){
+    // draw a few long streaks with low alpha
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for(let s=0;s<6;s++){
+      const sx = Math.random()*w;
+      ctx.beginPath();
+      ctx.moveTo(sx, -50*DPR);
+      ctx.bezierCurveTo(sx-30*DPR, h*0.3, sx+30*DPR, h*0.6, sx-10*DPR, h+60*DPR);
+      ctx.lineWidth = (1 + Math.random()*2) * DPR;
+      ctx.strokeStyle = 'rgba(255,255,255,' + (0.02 + Math.random()*0.03) + ')';
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // run
+  function start(){
+    resize();
+    // draw initial subtle streaks once
+    drawStreaks();
+    update();
+  }
+
+  // debounce resize
+  let rr;
+  window.addEventListener('resize', ()=>{ clearTimeout(rr); rr = setTimeout(resize,120); });
+  // start after small delay to ensure CSS settled
+  start();
+})();
+</script>
+</body>
+</html>
